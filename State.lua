@@ -31,3 +31,7 @@ end
 function State:isPlaying()
     return self.state == 'playing'
 end
+
+function State:debugInfo()
+    return self.state
+end

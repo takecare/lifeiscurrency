@@ -10,7 +10,7 @@ require 'State'
 require 'Player'
 
 state = State()
-player = Player()
+player = Player(virtualWidth / 2, virtualHeight / 2)
 
 function love.load()
     math.randomseed(os.time())
@@ -65,6 +65,10 @@ function love.keypressed(key)
     end
 end
 
+function love.mousepressed(x, y, button)
+    -- necessary?
+end
+
 function love.resize(w, h)
     push:resize(w, h)
 end
@@ -72,6 +76,7 @@ end
 function debugInfo()
     local windowDetails = windowWidth .. ' x ' .. windowHeight .. ' | ' .. virtualWidth .. ' x ' .. virtualHeight
     local fps = tostring(love.timer.getFPS())
-    local state = state.state
-    return windowDetails .. ' @ ' .. fps .. '\n' .. state
+    local state = state:debugInfo()
+    local player = player:debugInfo()
+    return windowDetails .. ' @ ' .. fps .. '\n' .. state .. '\n' .. player
 end
