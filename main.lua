@@ -7,8 +7,10 @@ virtualHeight = 192
 push = require 'push'
 Class = require 'class'
 require 'State'
+require 'Player'
 
 state = State()
+player = Player()
 
 function love.load()
     math.randomseed(os.time())
@@ -31,7 +33,9 @@ function love.update(dt)
     if state:isPaused() then
         return
     end
-    --
+    
+    player:handleInput()
+    player:update(dt)
 end
 
 function love.draw()
@@ -43,7 +47,7 @@ function love.draw()
 
     love.graphics.setColor(1, 1, 1)
 
-    -- TODO draw stuff
+    player:render()
 
     push:apply("end")
 
