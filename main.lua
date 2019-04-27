@@ -6,6 +6,9 @@ virtualHeight = 192
 
 push = require 'push'
 Class = require 'class'
+require 'State'
+
+state = State()
 
 function love.load()
     math.randomseed(os.time())
@@ -25,7 +28,10 @@ function love.load()
 end
 
 function love.update(dt)
-    -- TODO
+    if state:isPaused() then
+        return
+    end
+    --
 end
 
 function love.draw()
@@ -42,12 +48,12 @@ function love.draw()
     push:apply("end")
 
     love.graphics.setFont(font)
-    love.graphics.printf(windowWidth .. ' x ' .. windowHeight .. ' | ' .. virtualWidth .. ' x ' .. virtualHeight .. ' @ ' .. tostring(love.timer.getFPS()), 5, 5, windowWidth, 'left')
+    love.graphics.printf(debugInfo(), 5, 5, windowWidth, 'left')
 end
 
 function love.keypressed(key)
     if key == 'space' then
-        --
+        state:togglePause()
     elseif key == 'escape' then
         love.event.quit()
     elseif key == 'return' then
@@ -57,4 +63,11 @@ end
 
 function love.resize(w, h)
     push:resize(w, h)
+end
+
+function debugInfo()
+    local windowDetails = windowWidth .. ' x ' .. windowHeight .. ' | ' .. virtualWidth .. ' x ' .. virtualHeight
+    local fps = tostring(love.timer.getFPS())
+    local state = state.state
+    return windowDetails .. ' @ ' .. fps .. '\n' .. state
 end
