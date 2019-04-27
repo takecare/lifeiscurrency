@@ -8,6 +8,7 @@ push = require 'push'
 Class = require 'class'
 require 'State'
 require 'Player'
+require 'Gun'
 require 'Bullet'
 
 state = State()

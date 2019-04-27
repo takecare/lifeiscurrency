@@ -15,7 +15,8 @@ function Player:init(x, y)
 
     self.life = 10
     self.bullets = {}
-    self.gun = nil
+    self.firingCooldown = 0 -- move from here to Gun?
+    self.gun = Gun()
 end
 
 function Player:update(dt)
@@ -24,8 +25,15 @@ function Player:update(dt)
     self:updateRotation()
 
     for i,bullet in ipairs(self.bullets) do
+        if bullet:isDead() then
+            table.remove(self.bullets, i)
+        end
         bullet:update(dt)
     end
+
+    self.firingCooldown = self.firingCooldown - self.gun.rate * dt
+    
+    self.gun:update(self)
 end
 
 function Player:updateRotation()
@@ -59,11 +67,14 @@ function Player:render()
     setPlayerColor()
     -- love.graphics.rectangle('fill', self.x, self.y, self.size, self.size)
     love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.size, self.size)
-    setBackgroundColor()
 
     for i,bullet in ipairs(self.bullets) do
         bullet:render()
     end
+
+    self.gun:render()
+
+    setBackgroundColor()
 
     debugPoint(self.x, self.y)
     debugPoint(mousePos())
@@ -108,11 +119,17 @@ function Player:handleInput()
 end
 
 function Player:firing()
-    local tagetX, targetY = mousePos()
-    local bullet = Bullet(self.x, self.y, targetX, targetY)
+    if self.firingCooldown >= 0 then
+        return
+    end
+
+    self.firingCooldown = 20
+
+    local targetX, targetY = mousePos()
+    local bullet = Bullet(self.x, self.y, targetX, targetY, self.gun.speed)
     table.insert(self.bullets, bullet)
 end
 
 function Player:debugInfo()
-    return math.ceil(self.x) .. ',' .. math.ceil(self.y)
+    return math.ceil(self.x) .. ',' .. math.ceil(self.y) .. '\n' .. #self.bullets
 end
