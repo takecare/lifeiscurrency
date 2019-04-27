@@ -10,9 +10,12 @@ require 'State'
 require 'Player'
 require 'Gun'
 require 'Bullet'
+require 'Box'
 
 state = State()
-player = Player(virtualWidth / 2, virtualHeight / 2)
+player = Player(virtualWidth / 10, virtualHeight / 2)
+worldBounds = {} -- bounds
+world = {} -- obstacles/scenery
 
 function love.load()
     -- math.randomseed(os.time())
@@ -29,6 +32,9 @@ function love.load()
         vsync = true,
         pixelperfect = true
     })
+
+    table.insert(world, Box(virtualWidth / 2, virtualHeight / 5))
+    table.insert(world, Box(virtualWidth / 2, virtualHeight - virtualHeight / 10))
 end
 
 function love.update(dt)
@@ -38,6 +44,12 @@ function love.update(dt)
     
     player:handleInput()
     player:update(dt)
+
+    for i,bullet in ipairs(player.bullets) do
+        for j,box in ipairs(world) do
+            bullet:collidesWith(box)
+        end
+    end
 end
 
 function love.draw()
@@ -47,14 +59,26 @@ function love.draw()
     love.graphics.setColor(0, 0, 0)
     love.graphics.rectangle('fill', 0, 0, virtualWidth, virtualHeight)
 
-    love.graphics.setColor(1, 1, 1)
-
     player:render()
+    for i,box in ipairs(world) do
+        box:render()
+    end
+
+    -- love.graphics.setColor(1, 1, 1)
+    renderCursor()
 
     push:apply("end")
-
     love.graphics.setFont(font)
+    love.graphics.setColor(1, 1, 1)
     love.graphics.printf(debugInfo(), 5, 5, windowWidth, 'left')
+end
+
+function renderCursor()
+    local size = size == nil and 3 or size
+    local mouseX, mouseY = push:toGame(love.mouse.getPosition())
+    mouseX, mouseY = mouseX ~= nil and mouseX or 0, mouseY ~= nil and mouseY or 0
+    love.graphics.setColor(0, 0, 1)
+    love.graphics.rectangle('fill', mouseX, mouseY, size, size)
 end
 
 function love.keypressed(key)
@@ -80,5 +104,6 @@ function debugInfo()
     local fps = tostring(love.timer.getFPS())
     local state = state:debugInfo()
     local player = player:debugInfo()
-    return windowDetails .. ' @ ' .. fps .. '\n' .. state .. '\n' .. player
+    local world = #world
+    return windowDetails .. ' @ ' .. fps .. '\n' .. state .. '\n' .. player .. '\n' .. world
 end

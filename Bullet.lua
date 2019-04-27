@@ -9,7 +9,8 @@ function Bullet:init(startX, startY, targetX, targetY, speed)
     self.dy = speed * math.sin(angle)
 
     self.rotation = 0
-    self.size = 4
+    self.width = 4
+    self.height = 4
 
     self.ttl = 200
     self.ttlSpeed = 25
@@ -37,7 +38,8 @@ function Bullet:render()
     if (self:isDead()) then 
         return
     end
-    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.size, self.size)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.width, self.height)
 end
 
 function Bullet:kill()
@@ -46,6 +48,23 @@ end
 
 function Bullet:isDead()
     return not self.alive
+end
+
+function Bullet:collidesWith(other)
+    local minX, minY = self.x, self.y
+    local maxX, maxY = self.x + self.width, self.y + self.height
+    local otherMinX, otherMinY, otherMaxX, otherMaxY = other:boundingBox()
+    local collides = (minX <= otherMaxX and maxX >= otherMinX) and (minY <= otherMaxY and maxY >= otherMinY)
+
+    if collides then
+        self:kill()
+    end
+
+    return collides
+end
+
+function Bullet:boundingBox()
+    return self.x, self.y, self.x + self.width, self.y + self.height
 end
 
 function Bullet:debugInfo()

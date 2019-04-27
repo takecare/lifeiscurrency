@@ -22,6 +22,7 @@ function State:togglePause()
     else
         self:pause()
     end
+    love.mouse.setVisible(self:isPaused())
 end
 
 function State:isPaused()

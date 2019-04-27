@@ -23,6 +23,10 @@ function Gun:render()
     love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.width, self.height)
 end
 
+function Player:boundingBox()
+    --
+end
+
 function Gun:debugInfo()
     return math.ceil(self.x) .. ',' .. math.ceil(self.y)
 end

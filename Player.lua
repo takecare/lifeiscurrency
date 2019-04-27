@@ -4,7 +4,8 @@ function Player:init(x, y)
     self.x = x ~= nil and x or 25
     self.y = y ~= nil and y or 25
     self.rotation = 0
-    self.size = 8
+    self.width = 8
+    self.height = 8
 
     self.dy = 0
     self.dx = 0
@@ -65,8 +66,7 @@ end
 
 function Player:render()
     setPlayerColor()
-    -- love.graphics.rectangle('fill', self.x, self.y, self.size, self.size)
-    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.size, self.size)
+    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.width, self.height)
 
     for i,bullet in ipairs(self.bullets) do
         bullet:render()
@@ -74,25 +74,17 @@ function Player:render()
 
     self.gun:render()
 
-    setBackgroundColor()
-
     debugPoint(self.x, self.y)
-    debugPoint(mousePos())
 end
 
 function setPlayerColor()
     love.graphics.setColor(1, 1, 1)
 end
 
-function setBackgroundColor()
-    love.graphics.setColor(0, 0, 0)
-end
-
 function debugPoint(x, y, size)
     local size = size == nil and 3 or size
-    love.graphics.setColor(1, 0, 0)
+    love.graphics.setColor(1, 0, 1)
     love.graphics.rectangle('fill', x, y, size, size)
-    setBackgroundColor()
 end
 
 function Player:handleInput()
@@ -128,6 +120,10 @@ function Player:firing()
     local targetX, targetY = mousePos()
     local bullet = Bullet(self.x, self.y, targetX, targetY, self.gun.speed)
     table.insert(self.bullets, bullet)
+end
+
+function Player:boundingBox()
+    return self.x, self.y, self.x + self.width, self.y + self.height
 end
 
 function Player:debugInfo()
