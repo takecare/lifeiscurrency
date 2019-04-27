@@ -16,8 +16,10 @@ end
 function Player:update(dt)
     self.x = self.x + self.dx * dt
     self.y = self.y + self.dy * dt
+    self:updateRotation()
+end
 
-    --
+function Player:updateRotation()
     local mouseX, mouseY = mousePos()
     local x, y = self.x, self.y
     local hypotenuse = distance(mouseX, mouseY, x, y)
@@ -88,5 +90,5 @@ function Player:handleInput()
 end
 
 function Player:debugInfo()
-    return math.ceil(self.x) .. ',' .. math.ceil(self.y) .. ' ' .. self.rotation
+    return math.ceil(self.x) .. ',' .. math.ceil(self.y)
 end
