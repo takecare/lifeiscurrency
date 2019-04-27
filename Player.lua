@@ -1,22 +1,31 @@
 Player = Class{}
 
 function Player:init(x, y)
-    self.life = 10
     self.x = x ~= nil and x or 25
     self.y = y ~= nil and y or 25
+    self.rotation = 0
+    self.size = 8
+
     self.dy = 0
     self.dx = 0
-    self.size = 8
     self.speed = 45
     self.backwardsSpeed = 30
-    self.rotation = 0
+    
     self.sprite = love.graphics.newImage("player.png")
+
+    self.life = 10
+    self.bullets = {}
+    self.gun = nil
 end
 
 function Player:update(dt)
     self.x = self.x + self.dx * dt
     self.y = self.y + self.dy * dt
     self:updateRotation()
+
+    for i,bullet in ipairs(self.bullets) do
+        bullet:update(dt)
+    end
 end
 
 function Player:updateRotation()
@@ -51,6 +60,10 @@ function Player:render()
     -- love.graphics.rectangle('fill', self.x, self.y, self.size, self.size)
     love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.size, self.size)
     setBackgroundColor()
+
+    for i,bullet in ipairs(self.bullets) do
+        bullet:render()
+    end
 
     debugPoint(self.x, self.y)
     debugPoint(mousePos())
@@ -87,6 +100,17 @@ function Player:handleInput()
     else
         self.dx = 0
     end
+
+    if love.mouse.isDown(1) then
+        -- TODO cooldown period (depending on Gun)
+        self:firing()
+    end
+end
+
+function Player:firing()
+    local tagetX, targetY = mousePos()
+    local bullet = Bullet(self.x, self.y, targetX, targetY)
+    table.insert(self.bullets, bullet)
 end
 
 function Player:debugInfo()

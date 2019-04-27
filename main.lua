@@ -8,12 +8,13 @@ push = require 'push'
 Class = require 'class'
 require 'State'
 require 'Player'
+require 'Bullet'
 
 state = State()
 player = Player(virtualWidth / 2, virtualHeight / 2)
 
 function love.load()
-    math.randomseed(os.time())
+    -- math.randomseed(os.time())
     love.window.setTitle('life')
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
