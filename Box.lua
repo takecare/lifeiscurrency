@@ -20,11 +20,24 @@ end
 
 function Box:render()
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, self.scaleX, self.scaleY, self.width, self.height)
+    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, self.scaleX, self.scaleY)
+    self:debugPoint()
+    self:debugBoundingBox()
 end
 
 function Box:boundingBox()
-    return self.x, self.y, self.x + self.width, self.y + self.height
+    return self.x, self.y, self.width, self.height
+end
+
+function Box:debugPoint()
+    love.graphics.setColor(1, 0, 1)
+    love.graphics.rectangle('fill', self.x, self.y, 1, 1)
+end
+
+
+function Box:debugBoundingBox()
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.rectangle('line', self:boundingBox())
 end
 
 function Box:debugInfo()

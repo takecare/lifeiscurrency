@@ -39,7 +39,7 @@ function Bullet:render()
         return
     end
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.width, self.height)
+    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1)
 end
 
 function Bullet:kill()
@@ -53,7 +53,8 @@ end
 function Bullet:collidesWith(other)
     local minX, minY = self.x, self.y
     local maxX, maxY = self.x + self.width, self.y + self.height
-    local otherMinX, otherMinY, otherMaxX, otherMaxY = other:boundingBox()
+    local otherX, otherY, otherWidth, otherHeight = other:boundingBox()
+    local otherMinX, otherMinY, otherMaxX, otherMaxY = otherX, otherY, otherX + otherWidth, otherY + otherHeight
     local collides = (minX <= otherMaxX and maxX >= otherMinX) and (minY <= otherMaxY and maxY >= otherMinY)
 
     if collides then

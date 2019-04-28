@@ -34,22 +34,23 @@ function love.load()
     })
 
     table.insert(world, Box(virtualWidth / 2, virtualHeight / 5))
-    table.insert(world, Box(virtualWidth / 2, virtualHeight - virtualHeight / 10))
+    -- table.insert(world, Box(virtualWidth / 2, virtualHeight - virtualHeight / 10))
 end
 
 function love.update(dt)
     if state:isPaused() then
         return
     end
-    
-    player:handleInput()
-    player:update(dt)
 
-    for i,bullet in ipairs(player.bullets) do
-        for j,box in ipairs(world) do
+    for i,box in ipairs(world) do
+        player:collidesWith(box)
+        for i,bullet in ipairs(player.bullets) do
             bullet:collidesWith(box)
         end
     end
+
+    player:handleInput()
+    player:update(dt)
 end
 
 function love.draw()
@@ -59,12 +60,11 @@ function love.draw()
     love.graphics.setColor(0, 0, 0)
     love.graphics.rectangle('fill', 0, 0, virtualWidth, virtualHeight)
 
-    player:render()
     for i,box in ipairs(world) do
         box:render()
     end
 
-    -- love.graphics.setColor(1, 1, 1)
+    player:render()
     renderCursor()
 
     push:apply("end")
@@ -105,5 +105,5 @@ function debugInfo()
     local state = state:debugInfo()
     local player = player:debugInfo()
     local world = #world
-    return windowDetails .. ' @ ' .. fps .. '\n' .. state .. '\n' .. player .. '\n' .. world
+    return windowDetails .. ' @ ' .. fps .. ' : ' .. state .. '\n' .. player .. '\n' .. world
 end

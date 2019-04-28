@@ -11,18 +11,24 @@ function Player:init(x, y)
     self.dx = 0
     self.speed = 45
     self.backwardsSpeed = 30
-    
+    self.colliding = false
+
     self.sprite = love.graphics.newImage("player.png")
 
     self.life = 10
     self.bullets = {}
     self.firingCooldown = 0 -- move from here to Gun?
     self.gun = Gun()
+
+    --
+    self.collisions = ''
 end
 
 function Player:update(dt)
-    self.x = self.x + self.dx * dt
-    self.y = self.y + self.dy * dt
+
+    -- self.x = self.x + self.dx * dt
+    -- self.y = self.y + self.dy * dt
+    self:updatePosition(dt)
     self:updateRotation()
 
     for i,bullet in ipairs(self.bullets) do
@@ -35,6 +41,33 @@ function Player:update(dt)
     self.firingCooldown = self.firingCooldown - self.gun.rate * dt
     
     self.gun:update(self)
+end
+
+function Player:updatePosition(dt)
+    local collidingLeft = string.match(self.collisions, 'L')
+    local collidingRight = string.match(self.collisions, 'R')
+    local collidingTop = string.match(self.collisions, 'T')
+    local collidingBottom = string.match(self.collisions, 'B')
+
+    if self.dx < 0 then
+        if not collidingLeft then
+            self.x = self.x + self.dx * dt
+        end
+    elseif self.dx > 0 then
+        if not collidingRight then
+            self.x = self.x + self.dx * dt
+        end
+    end
+
+    if self.dy > 0 then
+        if not collidingBottom then
+            self.y = self.y + self.dy * dt
+        end
+    elseif self.dy < 0 then
+        if not collidingTop then
+            self.y = self.y + self.dy * dt
+        end
+    end
 end
 
 function Player:updateRotation()
@@ -74,17 +107,23 @@ function Player:render()
 
     self.gun:render()
 
-    debugPoint(self.x, self.y)
+    self:debugPoint()
+    self:debugBoundingBox()
 end
 
 function setPlayerColor()
     love.graphics.setColor(1, 1, 1)
 end
 
-function debugPoint(x, y, size)
-    local size = size == nil and 3 or size
+function Player:debugPoint()
     love.graphics.setColor(1, 0, 1)
-    love.graphics.rectangle('fill', x, y, size, size)
+    love.graphics.rectangle('fill', self.x, self.y, 3, 3)
+end
+
+function Player:debugBoundingBox()
+    local x, y, w, h = self:boundingBox()
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.rectangle('line', x, y, w, h)
 end
 
 function Player:handleInput()
@@ -118,14 +157,59 @@ function Player:firing()
     self.firingCooldown = 20
 
     local targetX, targetY = mousePos()
-    local bullet = Bullet(self.x, self.y, targetX, targetY, self.gun.speed)
+    local bullet = Bullet(self.gun.x, self.gun.y, targetX, targetY, self.gun.speed)
     table.insert(self.bullets, bullet)
 end
 
+function Player:collidesWith(other)
+    local minX, minY, width, height = self:boundingBox()
+    local maxX, maxY = minX + width, minY + height
+    local otherMinX, otherMinY, otherWidth, otherHeight = other:boundingBox()
+    local otherMaxX, otherMaxY = otherMinX + otherWidth, otherMinY + otherHeight
+
+    self.collisions = ''
+    
+    local collidesRight = (maxX > otherMinX and minX <= otherMaxX) 
+                            and (maxY > otherMinY and minY <= otherMaxY)
+                            and (maxX < otherMaxX)
+    local collidesLeft = (minX < otherMaxX and maxX >= otherMaxX) 
+                            and (maxY > otherMinY and minY <= otherMaxY)
+                            and (minX > otherMinX)
+    local collidesBottom = (maxY > otherMinY and minY <= otherMinY)
+                            and (
+                                (maxX > otherMinX and minX <= otherMaxX) 
+                                or (minX < otherMaxX and maxX >= otherMaxX)
+                            )
+    local collidesTop = (minY < otherMaxY and maxY >= otherMaxY)
+                            and (
+                                (maxX > otherMinX and minX <= otherMaxX) 
+                                or (minX < otherMaxX and maxX >= otherMaxX)
+                            )
+
+    if collidesLeft then
+        self.collisions = self.collisions .. 'L'
+    elseif collidesRight then
+        self.collisions = self.collisions .. 'R'
+    end
+    
+    if collidesTop then
+        self.collisions = self.collisions .. 'T'
+    elseif collidesBottom then
+        self.collisions = self.collisions .. 'B'
+    end
+
+    return collisions ~= ''
+end
+
+function Player:f()
+    return 0, 0, 0, 0
+end
+
 function Player:boundingBox()
-    return self.x, self.y, self.x + self.width, self.y + self.height
+    return self.x - self.width, self.y - self.height, self.width * 2, self.height * 2
 end
 
 function Player:debugInfo()
-    return math.ceil(self.x) .. ',' .. math.ceil(self.y) .. '\n' .. #self.bullets
+    local xy = math.ceil(self.x) .. ',' .. math.ceil(self.y)
+    return xy .. ' ' .. self.collisions .. '\n' .. #self.bullets
 end

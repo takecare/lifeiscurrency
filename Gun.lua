@@ -23,7 +23,7 @@ function Gun:render()
     love.graphics.draw(self.sprite, self.x, self.y, self.rotation, 1, 1, self.width, self.height)
 end
 
-function Player:boundingBox()
+function Gun:boundingBox()
     --
 end
 
